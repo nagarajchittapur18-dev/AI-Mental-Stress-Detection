@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center min-vh-100 pt-5">
+            <div class="col-lg-6 text-center text-lg-start">
+                <div class="hero-badge mb-3">
+                    <span class="badge glass-badge px-3 py-2">
+                        <i class="fas fa-sparkles me-1"></i> AI-Powered Platform
+                    </span>
+                </div>
+                <h1 class="display-3 fw-800 text-white mb-3">
+                    Smart Mental
+                    <span class="text-gradient">Wellness</span>
+                    Platform
+                </h1>
+                <p class="lead text-light opacity-75 mb-4">
+                    Predict your stress levels using advanced deep learning, detect emotions from facial expressions,
+                    and receive personalized AI-driven wellness recommendations.
+                </p>
+                <div class="d-flex gap-3 justify-content-center justify-content-lg-start flex-wrap">
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('predict') }}" class="btn btn-glow btn-lg px-4">
+                        <i class="fas fa-magic me-2"></i>Predict Stress
+                    </a>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light btn-lg px-4">
+                        <i class="fas fa-chart-line me-2"></i>Dashboard
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('register') }}" class="btn btn-glow btn-lg px-4">
+                        <i class="fas fa-rocket me-2"></i>Get Started
+                    </a>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg px-4">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6 text-center mt-5 mt-lg-0">
+                <div class="hero-illustration">
+                    <div class="floating-card glass-card p-4 mx-auto" style="max-width:380px;">
+                        <div class="brain-icon-wrapper mb-3">
+                            <i class="fas fa-brain fa-4x text-gradient"></i>
+                        </div>
+                        <h4 class="text-white fw-bold">Deep Learning ANN</h4>
+                        <p class="text-light opacity-75 small mb-3">6-feature neural network with 98%+ accuracy</p>
+                        <div class="d-flex justify-content-around text-center">
+                            <div>
+                                <h5 class="text-gradient mb-0">128</h5>
+                                <small class="text-light opacity-50">Neurons</small>
+                            </div>
+                            <div>
+                                <h5 class="text-gradient mb-0">3</h5>
+                                <small class="text-light opacity-50">Layers</small>
+                            </div>
+                            <div>
+                                <h5 class="text-gradient mb-0">98%</h5>
+                                <small class="text-light opacity-50">Accuracy</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold text-white">
+                Powerful <span class="text-gradient">Features</span>
+            </h2>
+            <p class="lead text-light opacity-75">Comprehensive mental wellness tools powered by AI</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <div class="glass-card feature-card p-4 h-100 text-center">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-brain fa-2x"></i>
+                    </div>
+                    <h5 class="text-white fw-bold">ANN Stress Prediction</h5>
+                    <p class="text-light opacity-75 small">Deep neural network analyzes 6 lifestyle parameters to predict your stress level with high accuracy.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="glass-card feature-card p-4 h-100 text-center">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-smile fa-2x"></i>
+                    </div>
+                    <h5 class="text-white fw-bold">Emotion Detection</h5>
+                    <p class="text-light opacity-75 small">Upload a photo and our AI detects facial emotions using DeepFace — happy, sad, neutral, and more.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="glass-card feature-card p-4 h-100 text-center">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-chart-line fa-2x"></i>
+                    </div>
+                    <h5 class="text-white fw-bold">Analytics Dashboard</h5>
+                    <p class="text-light opacity-75 small">Interactive charts track your stress history, trends, and predictions over time.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="glass-card feature-card p-4 h-100 text-center">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-lightbulb fa-2x"></i>
+                    </div>
+                    <h5 class="text-white fw-bold">AI Recommendations</h5>
+                    <p class="text-light opacity-75 small">Receive personalized wellness suggestions based on your prediction results.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="glass-card feature-card p-4 h-100 text-center">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-shield-alt fa-2x"></i>
+                    </div>
+                    <h5 class="text-white fw-bold">Secure Platform</h5>
+                    <p class="text-light opacity-75 small">Password hashing, secure sessions, and private data storage protect your wellness journey.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="glass-card feature-card p-4 h-100 text-center">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-arrow-trend-up fa-2x"></i>
+                    </div>
+                    <h5 class="text-white fw-bold">Trend Prediction</h5>
+                    <p class="text-light opacity-75 small">AI analyzes your stress history to forecast whether your mental wellness is improving or worsening.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="glass-card p-5">
+            <div class="row text-center g-4">
+                <div class="col-6 col-md-3">
+                    <h2 class="display-5 fw-bold text-gradient counter" data-target="98">0</h2>
+                    <p class="text-light opacity-75 mb-0">% Accuracy</p>
+                </div>
+                <div class="col-6 col-md-3">
+                    <h2 class="display-5 fw-bold text-gradient counter" data-target="6">0</h2>
+                    <p class="text-light opacity-75 mb-0">Features</p>
+                </div>
+                <div class="col-6 col-md-3">
+                    <h2 class="display-5 fw-bold text-gradient counter" data-target="7">0</h2>
+                    <p class="text-light opacity-75 mb-0">Emotions</p>
+                </div>
+                <div class="col-6 col-md-3">
+                    <h2 class="display-5 fw-bold text-gradient counter" data-target="3">0</h2>
+                    <p class="text-light opacity-75 mb-0">Stress Levels</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 mb-5">
+    <div class="container text-center">
+        <div class="glass-card p-5">
+            <h2 class="display-6 fw-bold text-white mb-3">
+                Ready to Understand Your <span class="text-gradient">Mental Wellness</span>?
+            </h2>
+            <p class="lead text-light opacity-75 mb-4">Start your journey to better mental health today.</p>
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('predict') }}" class="btn btn-glow btn-lg px-5">
+                <i class="fas fa-magic me-2"></i>Make a Prediction
+            </a>
+            {% else %}
+            <a href="{{ url_for('register') }}" class="btn btn-glow btn-lg px-5">
+                <i class="fas fa-user-plus me-2"></i>Create Free Account
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

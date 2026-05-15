@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+
+# Virtual Environment
+venv/
+env/
+.env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Database
+*.db
+instance/
+
+# Model artifacts (uncomment to track)
+# model/*.keras
+# model/*.pkl
+
+# Uploads
+uploads/
+
+# Logs
+*.log
+
+# Distribution
+*.tar.gz
+*.whl

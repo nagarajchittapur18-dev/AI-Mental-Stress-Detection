@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Predict Stress{% endblock %}
+
+{% block content %}
+<div class="container py-4 mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <h2 class="fw-bold text-white">
+                    <i class="fas fa-magic me-2 text-gradient"></i>Stress Prediction
+                </h2>
+                <p class="text-light opacity-75">Enter your lifestyle parameters for AI-powered stress analysis</p>
+            </div>
+
+            <div class="glass-card p-4 p-md-5">
+                <form method="POST" action="{{ url_for('predict') }}" id="predictForm">
+                    <div class="row g-4">
+                        <!-- Sleep Hours -->
+                        <div class="col-md-6">
+                            <div class="input-card glass-card-inner p-3">
+                                <label class="form-label text-light fw-bold">
+                                    <i class="fas fa-bed me-1 text-info"></i>Sleep Hours
+                                </label>
+                                <input type="range" class="form-range custom-range" id="sleep_hours" name="sleep_hours"
+                                       min="3" max="10" step="0.5" value="7" oninput="updateSlider(this)">
+                                <div class="d-flex justify-content-between">
+                                    <small class="text-light opacity-50">3h</small>
+                                    <span class="badge glass-badge" id="sleep_hours_val">7.0 hrs</span>
+                                    <small class="text-light opacity-50">10h</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Screen Time -->
+                        <div class="col-md-6">
+                            <div class="input-card glass-card-inner p-3">
+                                <label class="form-label text-light fw-bold">
+                                    <i class="fas fa-mobile-alt me-1 text-warning"></i>Screen Time
+                                </label>
+                                <input type="range" class="form-range custom-range" id="screen_time" name="screen_time"
+                                       min="1" max="16" step="0.5" value="5" oninput="updateSlider(this)">
+                                <div class="d-flex justify-content-between">
+                                    <small class="text-light opacity-50">1h</small>
+                                    <span class="badge glass-badge" id="screen_time_val">5.0 hrs</span>
+                                    <small class="text-light opacity-50">16h</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Work Hours -->
+                        <div class="col-md-6">
+                            <div class="input-card glass-card-inner p-3">
+                                <label class="form-label text-light fw-bold">
+                                    <i class="fas fa-briefcase me-1 text-danger"></i>Work Hours
+                                </label>
+                                <input type="range" class="form-range custom-range" id="work_hours" name="work_hours"
+                                       min="4" max="14" step="0.5" value="8" oninput="updateSlider(this)">
+                                <div class="d-flex justify-content-between">
+                                    <small class="text-light opacity-50">4h</small>
+                                    <span class="badge glass-badge" id="work_hours_val">8.0 hrs</span>
+                                    <small class="text-light opacity-50">14h</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Exercise Hours -->
+                        <div class="col-md-6">
+                            <div class="input-card glass-card-inner p-3">
+                                <label class="form-label text-light fw-bold">
+                                    <i class="fas fa-dumbbell me-1 text-success"></i>Exercise Hours
+                                </label>
+                                <input type="range" class="form-range custom-range" id="exercise_hours" name="exercise_hours"
+                                       min="0" max="4" step="0.5" value="1" oninput="updateSlider(this)">
+                                <div class="d-flex justify-content-between">
+                                    <small class="text-light opacity-50">0h</small>
+                                    <span class="badge glass-badge" id="exercise_hours_val">1.0 hrs</span>
+                                    <small class="text-light opacity-50">4h</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Social Interaction -->
+                        <div class="col-md-6">
+                            <div class="input-card glass-card-inner p-3">
+                                <label class="form-label text-light fw-bold">
+                                    <i class="fas fa-users me-1 text-primary"></i>Social Interaction
+                                </label>
+                                <input type="range" class="form-range custom-range" id="social_interaction" name="social_interaction"
+                                       min="1" max="10" step="0.5" value="5" oninput="updateSlider(this)">
+                                <div class="d-flex justify-content-between">
+                                    <small class="text-light opacity-50">Low 1</small>
+                                    <span class="badge glass-badge" id="social_interaction_val">5.0</span>
+                                    <small class="text-light opacity-50">High 10</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lifestyle Score -->
+                        <div class="col-md-6">
+                            <div class="input-card glass-card-inner p-3">
+                                <label class="form-label text-light fw-bold">
+                                    <i class="fas fa-heart me-1 text-danger"></i>Lifestyle Score
+                                </label>
+                                <input type="range" class="form-range custom-range" id="lifestyle_score" name="lifestyle_score"
+                                       min="1" max="10" step="0.5" value="5" oninput="updateSlider(this)">
+                                <div class="d-flex justify-content-between">
+                                    <small class="text-light opacity-50">Poor 1</small>
+                                    <span class="badge glass-badge" id="lifestyle_score_val">5.0</span>
+                                    <small class="text-light opacity-50">Great 10</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-glow btn-lg px-5" id="predictBtn">
+                            <i class="fas fa-brain me-2"></i>Analyze Stress Level
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function updateSlider(el) {
+    const valSpan = document.getElementById(el.id + '_val');
+    const isScore = el.id.includes('interaction') || el.id.includes('lifestyle');
+    valSpan.textContent = parseFloat(el.value).toFixed(1) + (isScore ? '' : ' hrs');
+}
+
+// Initialize all slider values on page load
+document.querySelectorAll('input[type="range"]').forEach(el => updateSlider(el));
+
+// Loading state on form submit
+document.getElementById('predictForm').addEventListener('submit', function() {
+    const btn = document.getElementById('predictBtn');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Analyzing...';
+    btn.disabled = true;
+});
+</script>
+{% endblock %}

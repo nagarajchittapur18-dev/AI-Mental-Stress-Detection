@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}Results{% endblock %}
+
+{% block content %}
+<div class="container py-4 mt-5">
+    <!-- Result Header -->
+    <div class="text-center mb-4">
+        <h2 class="fw-bold text-white">
+            <i class="fas fa-poll me-2 text-gradient"></i>Prediction Results
+        </h2>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        <!-- Main Result Card -->
+        <div class="col-lg-6">
+            <div class="glass-card p-4 p-md-5 text-center result-card-animate">
+                <!-- Stress Level Badge -->
+                <div class="result-level-wrapper mb-3">
+                    <div class="result-level-circle bg-{{ result.risk_color }}">
+                        <i class="fas fa-{% if result.risk_color == 'success' %}smile-beam{% elif result.risk_color == 'warning' %}meh{% else %}frown{% endif %} fa-3x"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold text-white mb-1">{{ result.stress_level }}</h3>
+                <p class="text-light opacity-75 mb-4">Predicted Stress Level</p>
+
+                <!-- Confidence Score -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-light">Confidence Score</span>
+                        <span class="text-white fw-bold">{{ result.confidence }}%</span>
+                    </div>
+                    <div class="progress glass-progress" style="height: 12px;">
+                        <div class="progress-bar bg-{{ result.risk_color }} progress-bar-animated progress-bar-striped"
+                             role="progressbar" style="width: {{ result.confidence }}%"
+                             aria-valuenow="{{ result.confidence }}" aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Probability Breakdown -->
+                <h6 class="text-light fw-bold mb-3">Probability Breakdown</h6>
+                {% for level, prob in result.probabilities.items() %}
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between mb-1">
+                        <small class="text-light opacity-75">{{ level }}</small>
+                        <small class="text-white">{{ prob }}%</small>
+                    </div>
+                    <div class="progress glass-progress" style="height: 6px;">
+                        <div class="progress-bar bg-{% if 'Low' in level %}success{% elif 'Moderate' in level %}warning{% else %}danger{% endif %}"
+                             style="width: {{ prob }}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Analytics Chart -->
+        <div class="col-lg-6">
+            <div class="glass-card p-4 h-100">
+                <h5 class="text-white fw-bold mb-3">
+                    <i class="fas fa-chart-pie me-2 text-gradient"></i>Stress Analytics
+                </h5>
+                <canvas id="resultChart" height="220"></canvas>
+
+                <!-- Input Summary -->
+                <h6 class="text-light fw-bold mt-4 mb-3">Your Inputs</h6>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="glass-card-inner p-2 text-center">
+                            <i class="fas fa-bed text-info"></i>
+                            <small class="text-light d-block">Sleep</small>
+                            <span class="text-white fw-bold">{{ inputs.sleep_hours }}h</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="glass-card-inner p-2 text-center">
+                            <i class="fas fa-mobile-alt text-warning"></i>
+                            <small class="text-light d-block">Screen</small>
+                            <span class="text-white fw-bold">{{ inputs.screen_time }}h</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="glass-card-inner p-2 text-center">
+                            <i class="fas fa-briefcase text-danger"></i>
+                            <small class="text-light d-block">Work</small>
+                            <span class="text-white fw-bold">{{ inputs.work_hours }}h</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="glass-card-inner p-2 text-center">
+                            <i class="fas fa-dumbbell text-success"></i>
+                            <small class="text-light d-block">Exercise</small>
+                            <span class="text-white fw-bold">{{ inputs.exercise_hours }}h</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Suggestions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <h5 class="text-white fw-bold mb-4">
+                    <i class="fas fa-lightbulb me-2 text-gradient"></i>AI Wellness Recommendations
+                </h5>
+                <div class="row g-3">
+                    {% for s in suggestions %}
+                    <div class="col-md-6">
+                        <div class="glass-card-inner p-3 d-flex align-items-start suggestion-card">
+                            <div class="suggestion-icon me-3">
+                                <i class="fas {{ s.icon }} fa-lg text-gradient"></i>
+                            </div>
+                            <p class="text-light mb-0 small">{{ s.text }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="text-center mt-4 mb-5">
+        <a href="{{ url_for('predict') }}" class="btn btn-glow me-2">
+            <i class="fas fa-redo me-1"></i>New Prediction
+        </a>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light">
+            <i class="fas fa-chart-line me-1"></i>View Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Result Donut Chart
+new Chart(document.getElementById('resultChart'), {
+    type: 'doughnut',
+    data: {
+        labels: [{% for k in result.probabilities %}'{{ k }}',{% endfor %}],
+        datasets: [{
+            data: [{% for v in result.probabilities.values() %}{{ v }},{% endfor %}],
+            backgroundColor: ['#43e97b', '#f9d423', '#f5576c'],
+            borderColor: 'rgba(255,255,255,0.1)',
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        cutout: '60%',
+        plugins: {
+            legend: { position: 'bottom', labels: { color: '#fff', padding: 12, font: { size: 11 } } }
+        }
+    }
+});
+</script>
+{% endblock %}

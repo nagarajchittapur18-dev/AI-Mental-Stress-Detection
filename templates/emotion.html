@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}Emotion Detection{% endblock %}
+
+{% block content %}
+<div class="container py-4 mt-5">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold text-white">
+            <i class="fas fa-smile me-2 text-gradient"></i>Emotion Detection
+        </h2>
+        <p class="text-light opacity-75">Upload a face image to detect emotions using AI</p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        <!-- Upload Card -->
+        <div class="col-lg-6">
+            <div class="glass-card p-4">
+                <form method="POST" action="{{ url_for('emotion') }}" enctype="multipart/form-data" id="emotionForm">
+                    <div class="upload-zone" id="uploadZone">
+                        <input type="file" class="d-none" id="imageInput" name="image" accept="image/*" required>
+                        <div class="upload-content text-center py-5" onclick="document.getElementById('imageInput').click()">
+                            <i class="fas fa-cloud-upload-alt fa-3x text-gradient mb-3"></i>
+                            <h5 class="text-white">Drop your image here</h5>
+                            <p class="text-light opacity-50 small">or click to browse (PNG, JPG, JPEG)</p>
+                            <img id="imagePreview" class="img-fluid rounded mt-3 d-none" style="max-height: 250px;">
+                            <p id="fileName" class="text-light mt-2 small d-none"></p>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-glow w-100 mt-3" id="detectBtn">
+                        <i class="fas fa-search me-2"></i>Detect Emotion
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Result Card -->
+        {% if emotion_result %}
+        <div class="col-lg-6">
+            <div class="glass-card p-4 result-card-animate">
+                {% if emotion_result.success %}
+                <!-- Emotion Result -->
+                <div class="text-center mb-4">
+                    <div class="emotion-emoji mb-2">
+                        <span style="font-size: 4rem;">{{ emotion_result.emoji }}</span>
+                    </div>
+                    <h3 class="text-white fw-bold text-capitalize">{{ emotion_result.dominant_emotion }}</h3>
+                    <p class="text-light opacity-75">Dominant Emotion Detected</p>
+                </div>
+
+                <!-- Emotion Breakdown -->
+                <h6 class="text-light fw-bold mb-3">Emotion Breakdown</h6>
+                {% for emotion, score in emotion_result.emotions.items() %}
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between mb-1">
+                        <small class="text-light text-capitalize">{{ emotion }}</small>
+                        <small class="text-white">{{ score }}%</small>
+                    </div>
+                    <div class="progress glass-progress" style="height: 8px;">
+                        <div class="progress-bar" style="width: {{ score }}%;
+                            background: {% if emotion == 'happy' %}#43e97b{% elif emotion == 'sad' %}#4facfe{% elif emotion == 'angry' %}#f5576c{% elif emotion == 'neutral' %}#a8a8a8{% elif emotion == 'surprise' %}#f9d423{% elif emotion == 'fear' %}#764ba2{% else %}#667eea{% endif %};">
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Emotion Chart -->
+                <canvas id="emotionChart" height="200" class="mt-3"></canvas>
+
+                <!-- Wellness Message -->
+                <div class="glass-card-inner p-3 mt-3">
+                    <p class="text-light mb-0 small">
+                        <i class="fas fa-lightbulb text-gradient me-2"></i>{{ emotion_result.message }}
+                    </p>
+                </div>
+                {% else %}
+                <!-- Error State -->
+                <div class="text-center py-4">
+                    <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                    <h5 class="text-white">Detection Failed</h5>
+                    <p class="text-light opacity-75">{{ emotion_result.message }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Image preview on file select
+document.getElementById('imageInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            const preview = document.getElementById('imagePreview');
+            preview.src = ev.target.result;
+            preview.classList.remove('d-none');
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileName').classList.remove('d-none');
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Drag and drop
+const zone = document.getElementById('uploadZone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    document.getElementById('imageInput').files = e.dataTransfer.files;
+    document.getElementById('imageInput').dispatchEvent(new Event('change'));
+});
+
+// Loading state
+document.getElementById('emotionForm').addEventListener('submit', function() {
+    const btn = document.getElementById('detectBtn');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Analyzing...';
+    btn.disabled = true;
+});
+
+{% if emotion_result and emotion_result.success %}
+// Emotion radar chart
+new Chart(document.getElementById('emotionChart'), {
+    type: 'radar',
+    data: {
+        labels: [{% for k in emotion_result.emotions %}'{{ k }}',{% endfor %}],
+        datasets: [{
+            label: 'Emotion Score',
+            data: [{% for v in emotion_result.emotions.values() %}{{ v }},{% endfor %}],
+            backgroundColor: 'rgba(102, 126, 234, 0.2)',
+            borderColor: '#667eea',
+            borderWidth: 2,
+            pointBackgroundColor: '#667eea'
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            r: {
+                ticks: { color: '#aaa', backdropColor: 'transparent' },
+                grid: { color: 'rgba(255,255,255,0.1)' },
+                pointLabels: { color: '#ddd', font: { size: 10 } }
+            }
+        },
+        plugins: { legend: { display: false } }
+    }
+});
+{% endif %}
+</script>
+{% endblock %}

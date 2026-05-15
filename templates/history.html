@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}History{% endblock %}
+
+{% block content %}
+<div class="container py-4 mt-5">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="fw-bold text-white">
+                <i class="fas fa-history me-2 text-gradient"></i>Prediction History
+            </h2>
+            <p class="text-light opacity-75 mb-0">All your past stress predictions</p>
+        </div>
+        <a href="{{ url_for('predict') }}" class="btn btn-glow btn-sm">
+            <i class="fas fa-plus me-1"></i>New
+        </a>
+    </div>
+
+    {% if records %}
+    <div class="glass-card p-4">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover glass-table mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Date & Time</th>
+                        <th>Sleep</th>
+                        <th>Screen</th>
+                        <th>Work</th>
+                        <th>Exercise</th>
+                        <th>Social</th>
+                        <th>Lifestyle</th>
+                        <th>Stress Level</th>
+                        <th>Confidence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in records %}
+                    <tr>
+                        <td class="text-light opacity-50">{{ r.id }}</td>
+                        <td>{{ r.created_at.strftime('%b %d, %Y %H:%M') }}</td>
+                        <td>{{ r.sleep_hours }}h</td>
+                        <td>{{ r.screen_time }}h</td>
+                        <td>{{ r.work_hours }}h</td>
+                        <td>{{ r.exercise_hours }}h</td>
+                        <td>{{ r.social_interaction }}</td>
+                        <td>{{ r.lifestyle_score }}</td>
+                        <td>
+                            <span class="badge bg-{% if r.stress_level == 'Low Stress' %}success{% elif r.stress_level == 'Moderate Stress' %}warning{% else %}danger{% endif %}">
+                                {{ r.stress_level }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="progress glass-progress flex-grow-1 me-2" style="height:6px; width:60px;">
+                                    <div class="progress-bar bg-info" style="width:{{ r.confidence }}%"></div>
+                                </div>
+                                <small>{{ "%.1f"|format(r.confidence) }}%</small>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if pagination.pages > 1 %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center mb-0">
+                <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link glass-page-link" href="{{ url_for('history', page=pagination.prev_num) }}">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+                {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if p %}
+                    <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                        <a class="page-link glass-page-link" href="{{ url_for('history', page=p) }}">{{ p }}</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled"><span class="page-link glass-page-link">…</span></li>
+                    {% endif %}
+                {% endfor %}
+                <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link glass-page-link" href="{{ url_for('history', page=pagination.next_num) }}">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="glass-card p-5 text-center">
+        <i class="fas fa-inbox fa-4x text-light opacity-25 mb-3"></i>
+        <h4 class="text-white">No Predictions Yet</h4>
+        <p class="text-light opacity-75">Start by making your first stress prediction.</p>
+        <a href="{{ url_for('predict') }}" class="btn btn-glow">
+            <i class="fas fa-magic me-2"></i>Predict Now
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

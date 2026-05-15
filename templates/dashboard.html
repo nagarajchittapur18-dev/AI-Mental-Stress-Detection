@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-4 mt-5">
+    <!-- Page Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="fw-bold text-white mb-1">
+                <i class="fas fa-chart-line me-2 text-gradient"></i>Analytics Dashboard
+            </h2>
+            <p class="text-light opacity-75 mb-0">Welcome back, {{ current_user.username }}!</p>
+        </div>
+        <a href="{{ url_for('predict') }}" class="btn btn-glow">
+            <i class="fas fa-plus me-1"></i>New Prediction
+        </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="glass-card stat-card p-3 text-center">
+                <div class="stat-icon bg-primary-subtle"><i class="fas fa-clipboard-list"></i></div>
+                <h3 class="text-white fw-bold mb-0 mt-2">{{ total_predictions }}</h3>
+                <small class="text-light opacity-75">Total Predictions</small>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="glass-card stat-card p-3 text-center">
+                <div class="stat-icon bg-success-subtle"><i class="fas fa-bullseye"></i></div>
+                <h3 class="text-white fw-bold mb-0 mt-2">{{ avg_confidence }}%</h3>
+                <small class="text-light opacity-75">Avg Confidence</small>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="glass-card stat-card p-3 text-center">
+                <div class="stat-icon bg-warning-subtle"><i class="fas fa-heartbeat"></i></div>
+                <h3 class="text-white fw-bold mb-0 mt-2 fs-5">{{ dominant_stress }}</h3>
+                <small class="text-light opacity-75">Most Common</small>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="glass-card stat-card p-3 text-center">
+                <div class="stat-icon bg-{{ trend.trend_color }}-subtle">
+                    <i class="fas {{ trend.trend_icon }}"></i>
+                </div>
+                <h3 class="text-white fw-bold mb-0 mt-2 fs-5">{{ trend.trend }}</h3>
+                <small class="text-light opacity-75">Trend</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Stress Trend Chart -->
+        <div class="col-lg-8">
+            <div class="glass-card p-4">
+                <h5 class="text-white fw-bold mb-3">
+                    <i class="fas fa-chart-area me-2 text-gradient"></i>Stress History Trend
+                </h5>
+                {% if total_predictions > 0 %}
+                <canvas id="stressTrendChart" height="280"></canvas>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-chart-bar fa-3x text-light opacity-25 mb-3"></i>
+                    <p class="text-light opacity-50">No data yet. Make your first prediction!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Distribution Donut -->
+        <div class="col-lg-4">
+            <div class="glass-card p-4">
+                <h5 class="text-white fw-bold mb-3">
+                    <i class="fas fa-chart-pie me-2 text-gradient"></i>Distribution
+                </h5>
+                {% if total_predictions > 0 %}
+                <canvas id="distributionChart" height="260"></canvas>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-chart-pie fa-3x text-light opacity-25 mb-3"></i>
+                    <p class="text-light opacity-50">No data yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Trend Message & Recent Records -->
+    <div class="row g-4 mt-2">
+        <!-- Trend Insight -->
+        <div class="col-lg-4">
+            <div class="glass-card p-4 h-100">
+                <h5 class="text-white fw-bold mb-3">
+                    <i class="fas fa-lightbulb me-2 text-gradient"></i>Trend Insight
+                </h5>
+                <div class="d-flex align-items-center mb-3">
+                    <span class="badge bg-{{ trend.trend_color }} fs-6 px-3 py-2 me-3">
+                        <i class="fas {{ trend.trend_icon }} me-1"></i>{{ trend.trend }}
+                    </span>
+                    <small class="text-light opacity-50">{{ trend.data_points }} data points</small>
+                </div>
+                <p class="text-light opacity-75">{{ trend.message }}</p>
+                <hr class="border-light opacity-25">
+                <div class="d-flex justify-content-between">
+                    <div class="text-center">
+                        <span class="badge bg-success px-2">{{ low_count }}</span>
+                        <br><small class="text-light opacity-50">Low</small>
+                    </div>
+                    <div class="text-center">
+                        <span class="badge bg-warning px-2">{{ mod_count }}</span>
+                        <br><small class="text-light opacity-50">Moderate</small>
+                    </div>
+                    <div class="text-center">
+                        <span class="badge bg-danger px-2">{{ high_count }}</span>
+                        <br><small class="text-light opacity-50">High</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Predictions Table -->
+        <div class="col-lg-8">
+            <div class="glass-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="text-white fw-bold mb-0">
+                        <i class="fas fa-history me-2 text-gradient"></i>Recent Predictions
+                    </h5>
+                    <a href="{{ url_for('history') }}" class="btn btn-sm btn-outline-light">View All</a>
+                </div>
+                {% if recent_records %}
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover glass-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Stress Level</th>
+                                <th>Confidence</th>
+                                <th>Sleep</th>
+                                <th>Work</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in recent_records %}
+                            <tr>
+                                <td>{{ r.created_at.strftime('%b %d, %H:%M') }}</td>
+                                <td>
+                                    <span class="badge bg-{% if r.stress_level == 'Low Stress' %}success{% elif r.stress_level == 'Moderate Stress' %}warning{% else %}danger{% endif %}">
+                                        {{ r.stress_level }}
+                                    </span>
+                                </td>
+                                <td>{{ "%.1f"|format(r.confidence) }}%</td>
+                                <td>{{ r.sleep_hours }}h</td>
+                                <td>{{ r.work_hours }}h</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-light opacity-50 text-center py-3 mb-0">No predictions yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+{% if total_predictions > 0 %}
+// Stress Trend Line Chart
+const trendCtx = document.getElementById('stressTrendChart').getContext('2d');
+const trendGradient = trendCtx.createLinearGradient(0, 0, 0, 280);
+trendGradient.addColorStop(0, 'rgba(102, 126, 234, 0.4)');
+trendGradient.addColorStop(1, 'rgba(102, 126, 234, 0.0)');
+
+new Chart(trendCtx, {
+    type: 'line',
+    data: {
+        labels: {{ chart_data.labels | tojson }},
+        datasets: [{
+            label: 'Stress Level',
+            data: {{ chart_data.stress_values | tojson }},
+            borderColor: '#667eea',
+            backgroundColor: trendGradient,
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 5,
+            pointBackgroundColor: '#667eea',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2
+        }, {
+            label: 'Confidence %',
+            data: {{ chart_data.confidences | tojson }},
+            borderColor: '#f093fb',
+            borderWidth: 2,
+            borderDash: [5, 5],
+            fill: false,
+            tension: 0.4,
+            pointRadius: 3,
+            yAxisID: 'y1'
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { labels: { color: '#fff' } }
+        },
+        scales: {
+            y: {
+                beginAtZero: true, max: 3,
+                ticks: {
+                    color: '#aaa', stepSize: 1,
+                    callback: v => ['', 'Low', 'Moderate', 'High'][v]
+                },
+                grid: { color: 'rgba(255,255,255,0.05)' }
+            },
+            y1: {
+                position: 'right', beginAtZero: true, max: 100,
+                ticks: { color: '#aaa', callback: v => v + '%' },
+                grid: { display: false }
+            },
+            x: {
+                ticks: { color: '#aaa' },
+                grid: { color: 'rgba(255,255,255,0.05)' }
+            }
+        }
+    }
+});
+
+// Distribution Donut Chart
+new Chart(document.getElementById('distributionChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Low Stress', 'Moderate Stress', 'High Stress'],
+        datasets: [{
+            data: [{{ low_count }}, {{ mod_count }}, {{ high_count }}],
+            backgroundColor: ['#43e97b', '#f9d423', '#f5576c'],
+            borderColor: 'rgba(255,255,255,0.1)',
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        cutout: '65%',
+        plugins: {
+            legend: { position: 'bottom', labels: { color: '#fff', padding: 15 } }
+        }
+    }
+});
+{% endif %}
+</script>
+{% endblock %}
